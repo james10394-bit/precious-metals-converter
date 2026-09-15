@@ -1,0 +1,7 @@
+{
+  "name": "precious-metals-twd-converter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "貴金屬現貨與新台幣換算器",
+  "license": "UNLICENSED"
+}
