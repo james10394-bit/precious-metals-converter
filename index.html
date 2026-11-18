@@ -7,41 +7,41 @@
   <meta name="description" content="整合上市與上櫃三大法人、KD、布林通道、均線與支撐壓力的台股研究工具。">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2312b89a'/%3E%3Cpath d='M12 42l12-13 9 8 19-22v12L34 48l-10-9-12 13z' fill='white'/%3E%3C/svg%3E">
   <title>台股法人技術分析站</title>
-  <link rel="stylesheet" href="style.css?v=2.4.9">
+  <link rel="stylesheet" href="style.css?v=2.7.0">
+  <style>
+    #stockSearchForm { margin-top: 16px; }
+    @media (max-width: 900px) { .workspace { grid-template-areas: "analysis" "watch"; } }
+    main > .workspace { grid-template-columns: minmax(0,1fr); grid-template-areas: "analysis" "watch"; }
+    main > .workspace > .watchhub { position: static; }
+    #foreignUpdate { margin-top: 16px; }
+    #foreignUpdate .panelhead { flex-wrap: wrap; gap: 8px; }
+  </style>
 </head>
 <body>
 <header class="top">
-  <div class="brand"><span class="mark">⌁</span><div><strong>台股法人技術分析站</strong><small>TWSE＋TPEx FLOW · v2.4.9 美股半導體指標版</small></div></div>
+  <div class="brand"><span class="mark">⌁</span><div><strong>台股法人技術分析站</strong><small>TWSE＋TPEx FLOW · v2.7.4 台股早盤走勢推估版</small></div></div>
   <a href="https://www.twse.com.tw/" target="_blank" rel="noopener">官方資料：臺灣證券交易所 ↗</a>
 </header>
 <main>
-  <div class="hero">
-    <div><div class="eyebrow">集中市場 · 法人籌碼 × 技術指標</div><h1>一頁看懂籌碼、趨勢與關鍵價位。</h1><p>整合外資、投信、自營商買賣超，並以歷史行情計算 KD、布林通道、均線與規則式進出場區間。</p></div>
+  <section class="panel" id="foreignUpdate" aria-labelledby="foreignUpdateTitle">
+    <div class="panelhead"><h2 id="foreignUpdateTitle">1. 當日外資買進與賣出</h2><button id="refresh" type="button">重新讀取資料</button></div>
+    <p id="dataFreshness" class="hint" role="status" style="line-height:1.8;margin:12px 0">正在確認法人資料更新狀態…</p>
+    <div class="scroll"><table><thead><tr><th scope="col">市場</th><th scope="col">資料日期</th><th scope="col">外資買進</th><th scope="col">外資賣出</th><th scope="col">淨買賣超</th></tr></thead><tbody id="foreignMarketTotals"><tr><td colspan="5">資料載入中…</td></tr></tbody></table></div>
+    <p class="hint">合計已取得的證券資料，單位為張。外資為資料來源提供的外資及陸資欄位。</p>
     <div class="stamp" id="stamp">讀取資料中…</div>
-  </div>
-  <div class="toolbar">
-    <label class="search"><span>搜尋上市／上櫃股票</span><input id="search" inputmode="search" placeholder="輸入代號或名稱，例如 2330、00981A" autocomplete="off" autocapitalize="characters"></label>
+  </section>
+  <form class="toolbar" id="stockSearchForm">
+    <label class="search"><span>2. 搜尋股票代號</span><input id="search" inputmode="search" placeholder="輸入代號或名稱，例如 4768、00981A" autocomplete="off" autocapitalize="characters"></label>
     <label>法人統計期間<select id="period"><option value="5">最近5日</option><option value="10">最近10日</option><option value="20" selected>最近20日</option></select></label>
-    <button id="refresh">重新讀取</button>
-  </div>
+    <button type="submit">查詢個股</button>
+  </form>
   <div class="workspace">
-    <aside class="watchhub" id="watchHub">
-      <div class="watchtop">
-        <div class="sectiontitle"><div class="eyebrow">自選焦點</div><h2>股票觀察室</h2><p>分類與個股可自由新增、刪除。</p></div>
-        <div class="watchactions"><button id="editWatch" type="button">編輯</button><button id="toggleWatch" type="button" aria-expanded="true" aria-controls="watchBody">收合</button></div>
-      </div>
-      <div class="watchbody" id="watchBody">
-        <div id="watchPages" class="watchpages"></div>
-        <div class="watchheading"><div><h3 id="watchTitle">我的自選股</h3><p id="watchSubtitle">讀取清單中…</p></div><span>點選股票立即分析</span></div>
-        <div id="watchlist" class="watchlist"></div>
-      </div>
-    </aside>
     <div class="analysiscol">
       <div id="status" role="status"></div>
 
       <section class="grid" id="content" hidden>
     <div class="heading stockheading">
-      <div class="stockidentity"><div class="eyebrow">個股完整診斷</div><h2 id="title">—</h2></div>
+      <div class="stockidentity"><div class="eyebrow">3. 個股與買賣資料</div><h2 id="title">—</h2></div>
       <section class="stockquick" aria-label="個股公司資訊與即時新聞">
         <div class="quickcompany">
           <div class="quicktitle"><span>公司簡介</span><a id="companyWebsite" target="_blank" rel="noopener">官方網站 ↗</a></div>
@@ -57,18 +57,49 @@
       <label class="datechooser">法人資料日期<select id="institutionDate" aria-label="選擇法人資料日期"></select><span id="dateBadge" hidden></span></label>
     </div>
     <div class="sectiontitle blocktitle"><div class="eyebrow">法人核心數字</div><h2>法人籌碼總覽</h2></div>
-    <div class="metrics five">
+
+    <div class="metrics six">
       <article class="card accent"><span>外資當日買賣超</span><strong id="foreignToday">—</strong><div id="foreignSub" class="sub"></div></article>
       <article class="card"><span>外資期間累計</span><strong id="foreignPeriod">—</strong><div id="foreignStreak" class="sub"></div></article>
       <article class="card"><span>投信期間累計</span><strong id="trustPeriod">—</strong><div class="sub">依選取期間統計</div></article>
       <article class="card"><span>自營商期間累計</span><strong id="dealerPeriod">—</strong><div class="sub">自行買賣＋避險</div></article>
-      <article class="card"><span>收盤價 · 本益比</span><strong id="closePe">—</strong><div class="sub">同一最新交易日</div></article>
+      <article class="card"><span>收盤價 · 本益比</span><strong id="closePe" class="closepe">—</strong><div id="closePeDate" class="sub">正在確認當日收盤</div></article>
+      <article class="card"><span>3日法人淨買超占成交量</span><strong id="largeHolder3d">—</strong><div id="largeHolder3dSub" class="sub">三大法人籌碼推估，非集保實際持股</div></article>
     </div>
+
+    <div class="sectiontitle blocktitle"><div class="eyebrow">資金流向</div><h2>三大法人資金動向</h2></div>
+    <div class="columns nomargin">
+      <article class="panel">
+        <div class="panelhead"><div><h3>三大法人買賣明細</h3><p>最新交易日 · 單位：張</p></div></div>
+        <div class="scroll"><table><thead><tr><th>法人</th><th>買進</th><th>賣出</th><th>買賣超</th></tr></thead><tbody id="details"></tbody></table></div>
+        <div class="divider"></div><h3>外資買賣力量</h3><p class="hint">買進占買進與賣出總量比例，不是即時委託簿。</p>
+        <div class="gauge"><div id="gaugeFill"></div></div><div id="gaugeText" class="gaugelegend"></div>
+      </article>
+      <article class="panel"><div class="panelhead"><div><h3>外資淨買賣走勢</h3><p>正數買超，負數賣超</p></div></div><div id="flowChart" class="chart"></div></article>
+    </div>
+
+    <section id="riskGuard" class="risk-guard guard-stop"></section>
+    <section class="position-panel"><h3>我的持倉風險 · <span id="positionCode"></span></h3><div class="position-inputs"><label>買進均價（元）<input id="positionCost" type="number" min="0.01" step="0.01" placeholder="實際成本"></label><label>持有股數（1張＝1000股）<input id="positionShares" type="number" min="1" step="1" placeholder="例如5000"></label><label>固定停損（元）<input id="positionStop" type="number" min="0.01" step="0.01" placeholder="自行設定"></label><button type="button" id="positionSave">儲存持倉</button><button type="button" id="positionClear">清除紀錄</button></div><p id="positionResult" class="position-result"></p><p>本機瀏覽器紀錄；非自動下單。固定停損不會隨每日重算向下移；停損價不保證能成交於該價。</p></section>
+    <div class="sectiontitle blocktitle"><div class="eyebrow">基本面 × 同業估值</div><h2>EPS 與公司本益比完整分析</h2></div>
+    <article class="panel fundamentalpanel">
+      <div class="panelhead"><div><h3>盈餘、估值與合理價帶</h3><p>以官方本益比、最新財報累計 EPS 與同產業公司比較；資料不足時明確標示。</p></div><div id="fundamentalRatio"></div></div>
+      <div id="fundamentalStats" class="fundamentalstats"></div>
+      <div id="fundamentalConclusion" class="fundamentalconclusion neutral"></div>
+      <p class="fundamentalnote">近四季 EPS 由「收盤價 ÷ 官方本益比」反推；合理價帶以同產業有效本益比中位數 ±20% 計算，不是目標價或獲利保證。</p>
+    </article>
+
+    <div class="sectiontitle blocktitle"><div class="eyebrow">外資持股 × 籌碼節奏 × 技術確認</div><h2>續抱、減碼與出場判讀</h2></div>
+    <article class="panel holdingpanel">
+      <div class="panelhead"><div><h3>籌碼續抱風險模型</h3><p>外資連買 3 日以上視為籌碼擁擠警示；溫和買超、持股比例高且趨勢健康，才偏向買進或續抱。</p></div><div id="holdingRatio"></div></div>
+      <div id="holdingFactors" class="advisorfactors holdingfactors"></div>
+      <div id="holdingConclusion" class="holdingconclusion neutral"></div>
+      <p class="modeldisclaimer">外資連買不等於一定上漲；持股比率、買超力道、股價是否轉弱及技術面必須一起判讀。此區為規則式風險提示，不是保證獲利的投資建議。</p>
+    </article>
 
     <div class="sectiontitle blocktitle"><div class="eyebrow">規則式策略</div><h2>策略判讀與操作區間</h2></div>
     <div class="columns planrow nomargin">
       <article class="panel">
-        <div class="panelhead"><div><h3>分析結論</h3><p>技術面 70%＋全球因素 30% 規則式評分</p></div><div id="overallRatio"></div></div>
+        <div class="panelhead"><div><h3>分析結論</h3><p>綜合分數與新進條件</p></div><div id="overallRatio"></div></div>
         <div id="tradePlan" class="signal neutral"></div>
       </article>
       <article class="panel">
@@ -82,30 +113,12 @@
       </article>
     </div>
 
-    <div class="sectiontitle blocktitle"><div class="eyebrow">公開操作理念轉譯</div><h2>華冠投顧・何丞唐方法模型</h2></div>
-    <article class="panel advisorpanel">
-      <div class="panelhead"><div><h3>籌碼、趨勢、第一手買點與八分飽紀律</h3><p>依公開操作理念，套用本站客觀數據產生；不是何丞唐顧問本人即時建議。</p></div><div id="advisorRatio"></div></div>
-      <div id="advisorFactors" class="advisorfactors"></div>
-      <div class="advisornote"><span>方法依據</span><p>深入研究產業、洞悉法人成本、精算籌碼、切入買點，以及八分飽分批落袋。</p><a href="https://www.hwa-guan.com.tw/Wealth/team/Teacher?T_id=17" target="_blank" rel="noopener">查看華冠投顧官方介紹 ↗</a></div>
-    </article>
-
     <div class="sectiontitle blocktitle modelneighbor"><div class="eyebrow">公開投資觀念量化</div><h2>世界投資大師原則模型</h2></div>
     <article class="panel masterpanel">
       <div class="panelhead"><div><h3>價值、趨勢、成長、心理與研究紀律</h3><p>將五位投資家的公開理念轉成可檢查條件，再結合個股產業資料。</p></div><div id="mastersRatio"></div></div>
       <div id="masterModels" class="mastergrid"></div>
       <p class="masterdisclaimer">此區為本站依公開投資原則建立的簡化模型，不代表巴菲特、索羅斯、彼得・林區、科斯托蘭尼或是川銀藏本人意見、授權或即時建議；缺少現金流、ROE、成長率等資料時會明確提示需另行核對。</p>
     </article>
-
-    <div class="sectiontitle blocktitle"><div class="eyebrow">資金流向</div><h2>三大法人資金動向</h2></div>
-    <div class="columns nomargin">
-      <article class="panel">
-        <div class="panelhead"><div><h3>三大法人買賣明細</h3><p>最新交易日 · 單位：張</p></div></div>
-        <div class="scroll"><table><thead><tr><th>法人</th><th>買進</th><th>賣出</th><th>買賣超</th></tr></thead><tbody id="details"></tbody></table></div>
-        <div class="divider"></div><h3>外資買賣力量</h3><p class="hint">買進占買進與賣出總量比例，不是即時委託簿。</p>
-        <div class="gauge"><div id="gaugeFill"></div></div><div id="gaugeText" class="gaugelegend"></div>
-      </article>
-      <article class="panel"><div class="panelhead"><div><h3>外資淨買賣走勢</h3><p>正數買超，負數賣超</p></div></div><div id="flowChart" class="chart"></div></article>
-    </div>
 
     <div class="sectiontitle blocktitle"><div class="eyebrow">日線技術面</div><h2>技術指標與價格趨勢</h2></div>
     <div class="columns techrow nomargin">
@@ -119,7 +132,7 @@
         </div>
       </article>
       <article class="panel indicators">
-        <h3>各項指標買賣比例</h3>
+        <h3>各項指標多空分數</h3>
         <div class="indicatoritem"><span>KD（9,3,3）</span><span id="kdRatio"></span><strong id="kd">—</strong></div>
         <div class="indicatoritem"><span>MACD（12,26,9）</span><span id="macdRatio"></span><strong id="macdValue">—</strong></div>
         <div class="indicatoritem"><span>布林 下／中／上</span><span id="bollRatio"></span><strong id="boll">—</strong></div>
@@ -150,30 +163,105 @@
     <div class="sectiontitle blocktitle"><div class="eyebrow">全球事件風險</div><h2>美股、連假與重大新聞影響</h2></div>
     <div class="columns globalrow nomargin">
       <article class="panel">
-        <div class="panelhead"><div><h3>全球環境買賣比例</h3><p id="globalStamp">讀取中…</p></div><div id="globalRatio"></div></div>
+        <div class="panelhead"><div><h3>全球環境多空分數</h3><p id="globalStamp">讀取中…</p></div><div id="globalRatio"></div></div>
         <div id="globalIndicators" class="globalindicators"></div>
         <div class="holiday"><span>美國／台灣假日與休市分析</span><strong id="holidayFactor">—</strong></div>
         <p class="hint">S&amp;P 500、那斯達克、道瓊、費城半導體、VIX、新聞標題關鍵字與休市風險採固定權重計算。</p>
       </article>
       <article class="panel">
-        <div class="panelhead"><div><h3>今日全球重點新聞</h3><p>川普政策、全球戰爭、台海、半導體與全球股市</p></div></div>
-        <div class="riskgrid"><div><h4>全球戰爭分析</h4><div id="warRisk" class="riskcard"></div></div><div><h4>台海情勢分析</h4><div id="straitRisk" class="riskcard"></div></div></div>
+        <div class="panelhead"><div><h3>今日全球重點新聞</h3><p>美國選舉、川普政策、戰爭、台海與市場新聞；均附來源及資料狀態</p></div></div>
+        <div class="riskgrid"><div><h4>全球戰爭新聞訊號</h4><div id="warRisk" class="riskcard"></div></div><div><h4>台海新聞訊號</h4><div id="straitRisk" class="riskcard"></div></div><div><h4>美國選舉觀測</h4><div id="electionRisk" class="riskcard"></div></div></div><section id="electionCalendar" class="election-calendar"></section><p id="newsCoverage" class="hint" role="status"></p><p id="newsMethod" class="hint"></p>
         <ul id="newsList" class="newslist"></ul>
       </article>
     </div>
 
-    <div class="sectiontitle blocktitle"><div class="eyebrow">市場排行</div><h2>市場外資排行榜</h2></div>
-    <div class="panel full nomargin">
-      <div class="panelhead"><div><h3>外資買賣超排行</h3><p>最新交易日 · 單位：張</p></div><div class="tabs"><button class="active" data-rank="buy">買超</button><button data-rank="sell">賣超</button></div></div>
-      <div class="scroll"><table><thead><tr><th>名次</th><th>股票</th><th>外資買賣超</th><th>收盤價</th></tr></thead><tbody id="ranking"></tbody></table></div>
-    </div>
       </section>
     </div>
+    <aside class="watchhub" id="watchHub">
+      <div class="watchtop">
+        <div class="sectiontitle"><div class="eyebrow">自選焦點</div><h2>股票觀察室</h2><p>分類與個股可自由新增、刪除。</p></div>
+        <div class="watchactions"><button id="editWatch" type="button">編輯</button><button id="toggleWatch" type="button" aria-expanded="true" aria-controls="watchBody">收合</button></div>
+      </div>
+      <div class="watchbody" id="watchBody">
+        <div id="watchPages" class="watchpages"></div>
+        <div class="watchheading"><div><h3 id="watchTitle">我的自選股</h3><p id="watchSubtitle">讀取清單中…</p></div><span>點選股票立即分析</span></div>
+        <div id="watchlist" class="watchlist"></div>
+      </div>
+    </aside>
   </div>
+  <div class="hero">
+    <div><div class="eyebrow">集中市場 · 法人籌碼 × 技術指標</div><h1>一頁看懂籌碼、趨勢與關鍵價位。</h1><p>整合外資、投信、自營商買賣超，並以歷史行情計算 KD、布林通道、均線與規則式進出場區間。</p></div>
+  </div>
+  <section class="opening-desk" id="taifexNight" aria-labelledby="taifexNightTitle">
+    <h2 id="taifexNightTitle">台指期夜盤與台股早盤分析</h2>
+    <p id="taifexNightStatus" role="status">正在確認期交所夜盤資料…</p>
+    <h3 id="taifexNightScenario"></h3>
+    <div id="taifexNightForecast" class="cycle-conclusion" hidden></div>
+    <div id="taifexNightMetrics" class="signal-cards"></div>
+    <details>
+      <summary>查看四種劇本和計算方式</summary>
+      <div class="scroll"><table><thead><tr><th scope="col">劇本</th><th scope="col">夜盤</th><th scope="col">外資淨額</th><th scope="col">台股早盤觀察</th></tr></thead>
+        <tbody><tr><td>一</td><td>上漲</td><td>≥ +1,000口</td><td>偏向開高，觀察是否續漲</td></tr>
+        <tr><td>二</td><td>上漲</td><td>負值</td><td>偏向開高，留意高開低走</td></tr>
+        <tr><td>三</td><td>下跌</td><td>負值</td><td>偏向開低，留意跌勢延續</td></tr>
+        <tr><td>四</td><td>下跌</td><td>≥ +1,000口</td><td>偏向開低，留意早盤反彈</td></tr></tbody></table></div>
+      <p>量比＝夜盤成交量 ÷（夜盤成交量＋前一交易日日盤一般時段成交量）。成交量用大台 TX 各到期月份小計，價格方向用近月合約的夜盤最後成交價減同合約日盤結算價。</p>
+      <p>量比低於30%為參考價值低，30%至40%為一般，超過40%為強訊號。外資採同一夜盤 TX 多方成交口數減空方成交口數，達 ±1,000 口標示明顯偏多或偏空。負值即符合劇本二或三的外資條件，未達千口時標示小幅偏空。夜盤平盤、外資為零或小幅偏多時不套用四種劇本。</p>
+      <p>費半以同一夜對應的美東收盤漲跌交叉確認。台指夜盤、外資與費半都明顯偏多或偏空時，顯示同向力道較完整。夜盤量比低於30%時，仍標示低參考。</p>
+      <p>劇本為盤前觀察規則，實際開盤可能與夜盤方向不同，規則尚未回測。</p>
+    </details>
+    <p><a href="https://www.taifex.com.tw/cht/3/futDailyMarketReport?commodity_id=TX" target="_blank" rel="noopener">期交所 TX 行情 ↗</a> · <a href="https://www.taifex.com.tw/cht/3/futContractsDateAh" target="_blank" rel="noopener">期交所夜盤外資多空淨額 ↗</a></p>
+  </section>
+  <section class="opening-desk long-cycle" id="longCycle" aria-label="1990年至今康波與長期市場研究">
+    <div class="eyebrow">長期歷史數據 × 長波假說檢驗</div><h2>1990年至今：康波週期與長期股市研究</h2>
+    <p id="cycleStatus" role="status">正在載入長期歷史資料…</p>
+    <div id="cycleConclusion" class="cycle-conclusion">先核對資料範圍，再判讀長期走勢。</div>
+    <div id="cycleMetrics" class="cycle-metrics"></div>
+    <div class="opening-title"><h3>台股加權指數歷史走勢</h3><label>圖表<select id="cycleChartMode"><option value="log">對數價格</option><option value="drawdown">月末收盤回撤</option></select></label></div>
+    <div id="cycleChart" class="cycle-chart"></div><p>圖表採已完成月份的月底最後成交日；對數座標等距代表相同漲跌比例。月末回撤可能小於上方以日收盤計算的最大回撤。本月最新收盤另列，未當作完整月線。</p>
+    <h3>未來走勢：條件式情境</h3><div id="cycleScenarios"></div>
+    <details open><summary>康波40／50／60年：計算結果與起點敏感度</summary>
+      <p>預先固定三種週期，以log(指數)＝常數＋時間趨勢＋sin(2πt/T)＋cos(2πt/T)擬合；不搜尋最佳週期。表中「上行／下行」只指扣除線性趨勢後，擬合波形在最後一個完整月的斜率，並非股市未來方向。更換1990、1995、2000起點可檢查判讀是否翻轉。</p>
+      <div id="cycleHypotheses"></div><p>樣本內R²包含時間趨勢的解釋力，不能用來證明康波存在。未涵蓋一圈長波，無法可靠定位春夏秋冬。</p>
+    </details>
+    <details><summary>逐步向前驗證：週期是否勝過簡單基準？</summary>
+      <p>先用180個已完成月訓練，向前預測12／36個月；每次只使用當時已知資料，測試起點按預測長度前進，不重疊。指標是平均絕對對數誤差×100，越小越好；並非勝率、策略報酬或標準百分比誤差。這只是固定週期假說的診斷，不能補足長波數量不足的限制。</p><div id="cycleBacktest"></div>
+    </details>
+    <details><summary>歷史分段報酬、回撤與持有期風險</summary>
+      <div id="cycleHistory"></div><p>分段漲跌由前一年度最後收盤至該段末日計算；1990從資料首日開始。分段回撤只比較區段內高點，與全樣本回撤不同。</p>
+      <div id="cycleWindows"></div><p>以上是所有歷史月末起算的重疊持有窗，P10／P90是歷史分位數；不等於未來80%信賴區間，也不是可實現的獲利承諾。</p>
+    </details>
+    <details><summary>資料、限制與研究依據</summary><p id="cycleSources"></p><ul id="cycleLimitations"></ul>
+      <p>康波研究關注技術、投資、信貸與物價的數十年變動；不能直接等同單一股價指數的固定循環。本版完成台股價格層面的假說診斷；總體因果尚未驗證，不將AI等題材直接指定為第六波的起點。</p>
+      <p><a href="https://www.twse.com.tw/zh/trading/historical/fmtqik.html" target="_blank" rel="noopener">證交所：每日市場成交資訊（1990起） ↗</a> · <a href="https://finance.yahoo.com/quote/%5ETWII/history/" target="_blank" rel="noopener">Yahoo Finance：TAIEX行情 ↗</a> · <a href="https://doi.org/10.1080/09538259.2023.2280803" target="_blank" rel="noopener">Hecht：長波實證重新檢驗 ↗</a> · <a href="https://arxiv.org/abs/2410.05285" target="_blank" rel="noopener">Modis：長波與量化可信度限制 ↗</a></p>
+      <p>文獻對長波存在及其穩定性並無一致結論；即使某些長期總體序列呈現約50年週期，也不等於台股可據此預測轉折。</p>
+    </details>
+  </section>
+  <section class="opening-desk foreign-rank" aria-label="外資淨買超排行">
+    <div class="opening-title"><div><div class="eyebrow">盤後法人 · 資料與盤中行情分開</div><h2>外資淨買超排行</h2></div><a href="#earlySignals">查看開盤警示 ↓</a></div>
+    <div class="rank-controls"><label>排序依據<select id="rankPeriod"><option value="1">當日淨買超</option><option value="5" selected>5日累計淨買超</option></select></label><label>市場<select id="rankMarket"><option value="all">上市＋上櫃普通股</option><option value="上市">上市</option><option value="上櫃">上櫃</option></select></label><div class="tabs"><button class="active" data-rank="buy">淨買超</button><button data-rank="sell">淨賣超</button></div></div>
+    <p id="rankSummary" role="status">等待盤後法人資料…</p><p>顯示前20名，5日是交易日；淨買超＝買進－賣出。外資連買3日以上加註警戒，不代表必跌。排行是籌碼觀察，不是買進名單。</p>
+    <div class="scroll"><table><thead><tr><th>排名</th><th>股票</th><th>當日淨買超</th><th>5日累計</th><th>連續買超</th><th>法人資料日收盤</th></tr></thead><tbody id="ranking"></tbody></table></div>
+  </section>
+  <section class="opening-desk" id="earlySignals" aria-label="開盤量價與委託警示">
+    <div class="eyebrow">盤中公開訊號 · 非外資身分辨識</div><h2>接近漲停與09:05前買盤觀測</h2>
+    <p>五檔是未成交委託，可能撤單，無法辨識外資。接近漲停只描述現在的位置，不預測一定漲停，也不構成追價建議。盤中成交量與盤後外資排行各自標時。</p>
+    <p id="signalCoverage" role="status">等待當日盤中資料…</p>
+    <h3>目前接近漲停（距漲停價2%內）</h3><div id="nearLimitSignals" class="signal-cards"></div>
+    <h3>當日09:05前曾觀測到買方委託偏多</h3><p>買方五檔合計至少500張且占雙方五檔80%以上；必須當時有實際抓到，啟動較晚不回填。這是委託紀錄，不是外資成交紀錄。</p><div id="earlyBookSignals" class="signal-cards"></div>
+  </section>
+  <section class="opening-desk" aria-label="開盤量能觀察">
+    <div class="opening-title"><div><div class="eyebrow">09:00 開盤觀察</div><h2>量能與風控候選 · 最多3檔</h2></div><button type="button" id="liveRefresh">更新盤中快照</button></div>
+    <p id="liveStatus" role="status">正在確認盤中資料…</p><p id="liveSelected"></p>
+    <p>開盤前5分鐘先觀察；約09:05後依實際觀測量篩選。量能比較為「開盤觀測量／前20日平均整日成交量」，不是同時段量比。每個產業最多1檔，符合條件不足3檔時不補滿。</p>
+    <p id="scanSummary"></p><div id="openingPicks" class="opening-picks"></div><div id="openingSectors" class="opening-sectors"></div>
+    <p id="scanDiagnostics" class="hint"></p>
+    <section class="volume-board"><h3 id="volumeBoardTitle">原始量能觀察榜</h3><p id="volumeBoardStatus" role="status"></p><p>量能排行與風控候選分開。表格有股票，只代表取得量能；不代表建議買進，盤後紀錄也不代表現在可買。</p><div class="scroll"><table><thead><tr><th>排名</th><th>股票</th><th>成交量</th><th>原觀測價格</th><th>資料時間／日期</th></tr></thead><tbody id="volumeBoard"></tbody></table></div></section>
+  </section>
 </main>
 <dialog id="watchEditor" class="watcheditor">
   <div class="editorhead"><div><div class="eyebrow">自選設定</div><h2>編輯股票觀察室</h2></div><button id="closeEditor" class="iconbutton" type="button" aria-label="關閉">×</button></div>
-  <p class="editorhelp">最多 10 個分類、每類最多 10 支上市或上櫃股票。設定會保存在這台裝置的瀏覽器。</p>
+  <p class="editorhelp">最多 10 個分類、每類最多 10 支上市、上櫃或興櫃股票／ETF。按住「⠿ 拖曳」即可排序，也可使用上下箭頭微調；設定會保存在這台裝置的瀏覽器。</p>
   <div id="editorPages" class="editorpages"></div>
   <div class="editorbar">
     <button id="addWatchPage" type="button">＋ 新增大標題</button>
@@ -188,8 +276,13 @@
 </dialog>
 <footer>
   資料取自臺灣證券交易所、證券櫃檯買賣中心公開盤後資料及公開市場／新聞摘要。所有比例均為固定公式評分，不代表上漲機率或獲利保證，僅供研究參考，不構成投資建議。<br>
-  <a href="https://www.twse.com.tw/zh/trading/foreign/t86.html">上市三大法人</a> · <a href="https://www.tpex.org.tw/zh-tw/mainboard/trading/major-institutional/detail/day.html">上櫃三大法人</a> · <a href="https://www.twse.com.tw/zh/trading/historical/bwibbu-day.html">本益比</a> · <a href="https://www.taifex.com.tw/cht/4/aHIntroduction">臺股期貨夜盤</a>
+  <a href="https://www.twse.com.tw/zh/trading/foreign/t86.html">上市三大法人</a> · <a href="https://www.tpex.org.tw/zh-tw/mainboard/trading/major-institutional/detail/day.html">上櫃三大法人</a> · <a href="https://www.twse.com.tw/zh/trading/historical/bwibbu-day.html">本益比</a> · <a href="https://openapi.twse.com.tw/">財報 EPS</a> · <a href="https://www.taifex.com.tw/cht/4/aHIntroduction">臺股期貨夜盤</a>
 </footer>
-<script src="app.js?v=2.4.9" defer></script>
+<script src="risk-engine.js?v=2.7.2" defer></script>
+<script src="market-signals.js?v=2.7.0" defer></script>
+<script src="intraday-ui.js?v=2.7.2" defer></script>
+<script src="long-cycle.js?v=2.7.0" defer></script>
+<script src="app.js?v=2.7.2" defer></script>
+<script src="taifex-night.js?v=2.7.4" defer></script>
 </body>
 </html>
